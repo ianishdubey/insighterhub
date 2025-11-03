@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="dashboard-theme">
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="/"><img src="{% static 'images/login.png' %}" alt="Logo" class="navbar-logo"></a>
+      <h3>Land Insights</h3>
+    </div>
+  </nav>
+
+  <h2>{{ title }}</h2>
+
+  <div class="dashboard-container">
+    <div class="note-card" style="max-width: 700px; margin-top: 10px;">
+      <h4>Upload a new gallery item</h4>
+      <p>Only admins can add items. Image files will be stored under media/gallery/.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" style="background:#fff; padding:20px; border-radius:12px; max-width:700px; margin: 20px auto;">
+      {% csrf_token %}
+      {% if error %}
+      <div style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; padding:10px 12px; border-radius:8px; margin-bottom:12px;">
+        {{ error }}
+      </div>
+      {% endif %}
+      <div style="margin-bottom: 12px;">
+        <label style="display:block; font-weight:600; margin-bottom:6px;">Image</label>
+        <input type="file" name="image" accept="image/*" required>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display:block; font-weight:600; margin-bottom:6px;">Description</label>
+        <textarea name="description" rows="3" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e5e7eb;"></textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="map-toggle-btn">Save</button>
+        <a href="/{{ category }}/gallery/" class="map-toggle-btn" style="text-decoration:none;">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <footer class="simple-footer">
+    <p>&copy; 2025 Land Insights</p>
+  </footer>
+</body>
+</html>
+
+

@@ -1,0 +1,6 @@
+name,state,average_land_holding,land_holding,irrigation_type,dominant_crops,rainfall,yield_per_hectare,irrigation_area,latitude,longitude
+Ludhiana,Punjab,2.1,2.3,Tube Well,"Wheat, Rice",700,3.5,1500,30.9010,75.8573
+Pune,Maharashtra,1.5,1.4,Canal,"Sugarcane, Wheat",720,2.9,1200,18.5204,73.8567
+Coimbatore,Tamil Nadu,1.2,1.1,Drip,"Cotton, Coconut",600,3.1,800,11.0168,76.9558
+Lucknow,Uttar Pradesh,1.0,1.0,Canal,"Rice, Wheat",900,2.7,1100,26.8467,80.9462
+Kolkata,West Bengal,0.8,0.9,Well,"Rice, Jute",1600,2.5,600,22.5726,88.3639

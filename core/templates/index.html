@@ -1,0 +1,179 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Insighterhub Dashboard</title>
+  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+  <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+
+
+<body class="dashboard-theme">
+  <!-- Background Video -->
+  <video class="dashboard-background-video" autoplay muted loop>
+    <source src="https://cdn.pixabay.com/video/2022/09/27/132720-754551941_large.mp4" type="video/mp4">
+    <!-- Fallback for browsers that don't support video -->
+  </video>
+  <div class="dashboard-overlay"></div>
+  
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="/"><img src="{% static 'images/login.png' %}" alt="Logo" class="navbar-logo"></a>
+      <h3>Insighterhub</h3>
+      <ul>
+        <li><a href="/" id="dashboard-link">Dashboard</a></li>
+        <li><a href="/holding/" id="holding-link">Land Holding</a></li>
+        <li><a href="/irrigation/" id="irrigation-link">Irrigation</a></li>
+        <li><a href="/cropping/" id="cropping-link">Cropping Patterns</a></li>
+      </ul>
+    </div>
+    <div class="navbar-right">
+      <a href="/logout/" class="map-toggle-btn">Logout</a>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <h2>Land Insights Dashboard</h2>
+
+  <!-- Agriculture Insights Dashboard -->
+  <div class="dashboard-container">
+    
+    <!-- Compact Title Box with Hover Details -->
+    <div class="insights-container">
+      <div class="insight-title" data-details="agriculture-insights">
+        <span class="title-icon">🌱</span>
+        <span class="title-text">Agriculture Insights</span>
+        <div class="detail-box" id="agriculture-insights">
+          <div class="detail-content">
+            <h4>🌱 Agriculture Insights</h4>
+            <p>India's agriculture sector is diverse, with crops ranging from rice and wheat to cotton and spices. Understanding land fertility and irrigation methods helps farmers maximize yield and sustainability.</p>
+            <p>Drip irrigation and modern water management techniques can increase crop productivity while conserving water resources.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="insight-title" data-details="tips-farmers">
+        <span class="title-icon">💡</span>
+        <span class="title-text">Tips for Farmers</span>
+        <div class="detail-box" id="tips-farmers">
+          <div class="detail-content">
+            <h4>💡 Tips for Farmers</h4>
+            <ul>
+              <li>Regular soil testing can help determine nutrient deficiencies and improve crop rotation strategies.</li>
+              <li>Crop diversification reduces risk and improves soil health over time.</li>
+              <li>Organic fertilizers and natural pest management promote sustainable farming.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="insight-title" data-details="land-management">
+        <span class="title-icon">🏞️</span>
+        <span class="title-text">Land Management</span>
+        <div class="detail-box" id="land-management">
+          <div class="detail-content">
+            <h4>🏞️ Land Management Best Practices</h4>
+            <ul>
+              <li>Maintaining proper land records ensures legal protection and better access to government schemes.</li>
+              <li>Using GIS mapping and satellite imagery can help track land use, crop patterns, and irrigation efficiency.</li>
+              <li>Community farming and cooperative initiatives help optimize resources and improve profitability.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="insight-title" data-details="current-trends">
+        <span class="title-icon">📈</span>
+        <span class="title-text">Current Trends</span>
+        <div class="detail-box" id="current-trends">
+          <div class="detail-content">
+            <h4>📈 Current Trends & News</h4>
+            <ul>
+              <li>Government of India promotes micro-irrigation schemes to support small farmers.</li>
+              <li>States like Maharashtra and Punjab have reported higher yields for wheat and rice using precision agriculture techniques.</li>
+              <li>Agri-tech startups are providing real-time weather and soil data to farmers across India.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="insight-title" data-details="fun-facts">
+        <span class="title-icon">🌾</span>
+        <span class="title-text">Did You Know?</span>
+        <div class="detail-box" id="fun-facts">
+          <div class="detail-content">
+            <h4>🌾 Did You Know?</h4>
+            <ul>
+              <li>India is the second largest producer of fruits and vegetables in the world.</li>
+              <li>Rice, wheat, and sugarcane occupy the majority of India's irrigated land.</li>
+              <li>Crop rotation has been practiced for centuries to maintain soil fertility.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Text Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">Farming with Foresight</h1>
+        <h2 class="hero-subtitle">Discover your land’s true potential through meaningful insights.</h2>
+        <p class="hero-description">Our platform provides comprehensive analysis of land holdings, irrigation systems, and cropping patterns to enhance agricultural productivity</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Additional Content Sections -->
+  <div class="content-sections">
+    <div class="content-section">
+      <h3>🌱 About Insighterhub</h3>
+      <p>Insighterhub is a comprehensive agricultural data platform designed to help farmers, researchers, and policymakers make informed decisions about land use, irrigation, and crop patterns across India.</p>
+      <p>Our mission is to promote sustainable agriculture through data-driven insights and modern technology.</p>
+    </div>
+    
+    <div class="content-section">
+      <h3>📊 Our Services</h3>
+      <ul>
+        <li>Land Holding Analysis</li>
+        <li>Irrigation Pattern Mapping</li>
+        <li>Crop Pattern Visualization</li>
+        <li>Agricultural Insights</li>
+        <li>Farmer Support Resources</li>
+      </ul>
+    </div>
+    
+    <div class="content-section">
+      <h3>🌾 Key Features</h3>
+      <ul>
+        <li>Interactive Maps</li>
+        <li>Real-time Data</li>
+        <li>GIS Integration</li>
+        <li>Mobile Responsive</li>
+        <li>Multi-language Support</li>
+      </ul>
+    </div>
+    
+    <div class="content-section">
+      <h3>📞 Contact Us</h3>
+      <p><strong>Email:</strong> honeydubey1104@gmail.com</p>
+      <p><strong>Phone:</strong> +91-9149907397</p>
+      <p><strong>Address:</strong> Lovely Professional University,Jalandhar</p>
+      <div class="social-links">
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Footer -->
+  <footer class="simple-footer">
+    <p>&copy; 2025 Insighterhub. All rights reserved. Built with ❤️ for Indian Agriculture</p>
+  </footer>
+
+  <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>

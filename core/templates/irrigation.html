@@ -1,0 +1,304 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Irrigation | Insighterhub</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="cornfield-breeze-theme">
+  <!-- Background Video -->
+  <video class="dashboard-background-video" autoplay muted loop>
+    <source src="https://cdn.pixabay.com/video/2025/09/20/305377_large.mp4" type="video/mp4">
+    <!-- Fallback for browsers that don't support video -->
+  </video>
+  <div class="dashboard-overlay"></div>
+  
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="/"><img src="{% static 'images/login.png' %}" alt="Logo" class="navbar-logo"></a>
+      <h3>Insighterhub</h3>
+      <ul>
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/holding/">Land Holding</a></li>
+        <li><a href="/irrigation/">Irrigation</a></li>
+        <li><a href="/cropping/">Cropping Patterns</a></li>
+      </ul>
+    </div>
+    <div class="navbar-right">
+      <a href="/logout/" class="map-toggle-btn">Logout</a>
+    </div>
+  </nav>
+  <h2>Irrigation</h2>
+  
+  <!-- Subtitle and Overview -->
+  <div class="land-holding-subtitle">
+    <h3>Monitor and optimize your irrigation systems — from water sources and coverage to efficiency metrics and seasonal patterns.</h3>
+  </div>
+
+  <!-- Summary Statistics Cards -->
+  <div class="summary-stats">
+    <div class="stat-card">
+      <div class="stat-icon">🌊</div>
+      <div class="stat-value" id="total-irrigated-area">Loading...</div>
+      <div class="stat-label">Total Irrigated Area (Ha)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🌾</div>
+      <div class="stat-value" id="kharif-area">Loading...</div>
+      <div class="stat-label">Kharif Season (Ha)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🌱</div>
+      <div class="stat-value" id="rabi-area">Loading...</div>
+      <div class="stat-label">Rabi Season (Ha)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🌳</div>
+      <div class="stat-value" id="perennial-area">Loading...</div>
+      <div class="stat-label">Perennial Crops (Ha)</div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-cards">
+    <div class="kpi-card">
+      <div class="kpi-icon">🌊</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Total Irrigated Area</div>
+        <div class="kpi-value" id="kpi-total-area">Loading...</div>
+        <div class="kpi-trend">Across all seasons</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌾</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Kharif Season</div>
+        <div class="kpi-value" id="kpi-kharif-area">Loading...</div>
+        <div class="kpi-trend">Monsoon crops</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌱</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Rabi Season</div>
+        <div class="kpi-value" id="kpi-rabi-area">Loading...</div>
+        <div class="kpi-trend">Winter crops</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌳</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Perennial Crops</div>
+        <div class="kpi-value" id="kpi-perennial-area">Loading...</div>
+        <div class="kpi-trend">Year-round crops</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Other Crops</div>
+        <div class="kpi-value" id="kpi-others-area">Loading...</div>
+        <div class="kpi-trend">Additional crops</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🏛️</div>
+      <div class="kpi-content">
+        <div class="kpi-title">States Covered</div>
+        <div class="kpi-value" id="kpi-states-count">Loading...</div>
+        <div class="kpi-trend">Geographic coverage</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-container">
+    <div class="map-controls" style="margin-bottom: 20px;">
+      <button id="toggle-map-btn" class="map-toggle-btn">🗺️ Map</button>
+      <button id="toggle-chart-btn" class="map-toggle-btn">📊 Chart</button>
+      <a href="/irrigation/gallery/" class="map-toggle-btn" style="text-decoration:none; display:inline-block; text-align:center;">📷 Gallery</a>
+    </div>
+    <div id="map-section" style="display: none;">
+      <div id="map" style="height: 400px; margin-top: 20px; border-radius: 10px; overflow: hidden;"></div>
+      <div class="note-card">
+        <h4>Irrigation coverage map</h4>
+        <p>Each marker represents a state's centroid. Color shows total irrigated area (Ha): gray = no data, green = < 50k, yellow = 50k–500k, orange = 500k–2M, red = > 2M.</p>
+        <p class="muted">Click a marker to view Kharif, Rabi, Perennial, Others, and Total irrigated area.</p>
+      </div>
+    </div>
+    <div id="chart-section" style="display: none;">
+      <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h4 style="text-align: center; margin-bottom: 20px; color: #2d3748;">Irrigation Area Distribution</h4>
+        <canvas id="irrigationChart" style="max-height: 400px;"></canvas>
+      </div>
+      <div class="note-card">
+        <h4>Irrigation area chart</h4>
+        <p>Bar chart showing total irrigated area by state. Colors match the map scale for easy comparison.</p>
+        <p class="muted">Hover over bars to see exact values and state names.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Irrigation Systems Table -->
+  <div class="land-details-section">
+    <div class="section-header">
+      <h3>🚰 Irrigation Systems Details</h3>
+      <div class="filter-bar">
+        <input type="text" id="search-input" placeholder="🔍 Search by system / source / season" class="search-input">
+        <select id="source-filter" class="filter-select">
+          <option value="">All Water Sources</option>
+          <option value="Canal">Canal</option>
+          <option value="Tube Well">Tube Well</option>
+          <option value="Open Well">Open Well</option>
+          <option value="Pond">Pond</option>
+          <option value="River">River</option>
+        </select>
+        <select id="season-filter" class="filter-select">
+          <option value="">All Seasons</option>
+          <option value="Kharif">Kharif</option>
+          <option value="Rabi">Rabi</option>
+          <option value="Perennial">Perennial</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="land-table">
+        <thead>
+          <tr>
+            <th>System ID</th>
+            <th>Location</th>
+            <th>Area (Ha)</th>
+            <th>Water Source</th>
+            <th>Season</th>
+            <th>Efficiency (%)</th>
+            <th>Water Usage (L/day)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>I-101</td>
+            <td>Block A</td>
+            <td>45</td>
+            <td>Canal</td>
+            <td>Kharif</td>
+            <td>85</td>
+            <td>2,500</td>
+          </tr>
+          <tr>
+            <td>I-102</td>
+            <td>Block B</td>
+            <td>32</td>
+            <td>Tube Well</td>
+            <td>Rabi</td>
+            <td>78</td>
+            <td>1,800</td>
+          </tr>
+          <tr>
+            <td>I-103</td>
+            <td>Block C</td>
+            <td>28</td>
+            <td>Open Well</td>
+            <td>Perennial</td>
+            <td>72</td>
+            <td>1,200</td>
+          </tr>
+          <tr>
+            <td>I-104</td>
+            <td>Block D</td>
+            <td>38</td>
+            <td>Canal</td>
+            <td>Kharif</td>
+            <td>88</td>
+            <td>2,200</td>
+          </tr>
+          <tr>
+            <td>I-105</td>
+            <td>Block E</td>
+            <td>25</td>
+            <td>Pond</td>
+            <td>Rabi</td>
+            <td>65</td>
+            <td>1,500</td>
+          </tr>
+          <tr>
+            <td>I-106</td>
+            <td>Block F</td>
+            <td>42</td>
+            <td>River</td>
+            <td>Perennial</td>
+            <td>82</td>
+            <td>2,800</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Insights and Recommendations -->
+  <div class="insights-section">
+    <h3>📍 Irrigation Insights & Analysis</h3>
+    <div class="insights-grid">
+      <div class="insight-card positive">
+        <div class="insight-icon">🌾</div>
+        <div class="insight-content">
+          <div class="insight-title">Kharif Season Focus</div>
+          <div class="insight-text">Kharif season shows significant irrigation coverage, supporting monsoon-dependent crops across multiple states.</div>
+        </div>
+      </div>
+      <div class="insight-card warning">
+        <div class="insight-icon">🌱</div>
+        <div class="insight-content">
+          <div class="insight-title">Rabi Season Analysis</div>
+          <div class="insight-text">Rabi season irrigation data helps identify winter crop irrigation patterns and water requirements.</div>
+        </div>
+      </div>
+      <div class="insight-card alert">
+        <div class="insight-icon">🌳</div>
+        <div class="insight-content">
+          <div class="insight-title">Perennial Crop Support</div>
+          <div class="insight-text">Perennial crop irrigation data indicates year-round agricultural activity and water management needs.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historical Trends -->
+  <div class="trends-section">
+    <h3>📈 Irrigation Trends & Analysis</h3>
+    <div class="trends-grid">
+      <div class="trend-card">
+        <h4>Irrigation Coverage Over the Years</h4>
+        <div class="trend-chart" id="coverage-chart">
+          <canvas id="coverageChart"></canvas>
+        </div>
+      </div>
+      <div class="trend-card">
+        <h4>Water Use Efficiency Trend (2020–2025)</h4>
+        <div class="trend-chart" id="efficiency-chart">
+          <canvas id="efficiencyChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insights Summary -->
+  <div class="insights-summary">
+    <h3>🧠 Irrigation Insights Summary</h3>
+    <div class="summary-content">
+      <p>Based on the irrigation data, the total irrigated area shows seasonal distribution across <strong>Kharif</strong>, <strong>Rabi</strong>, and <strong>Perennial</strong> crops. The data reflects actual irrigation coverage across different states and regions.</p>
+      <p>Each state's irrigation data includes detailed breakdown by season, allowing for comprehensive analysis of irrigation patterns and agricultural planning across different crop cycles.</p>
+    </div>
+  </div>
+  
+  <!-- Simple Footer -->
+  <footer class="simple-footer">
+    <p>&copy; 2025 Insighterhub. All rights reserved. Built with ❤️ for Indian Agriculture</p>
+  </footer>
+  
+  <script src="{% static 'js/irrigation.js' %}"></script>
+</body>
+</html>
+

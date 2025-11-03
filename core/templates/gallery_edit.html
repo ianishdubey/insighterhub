@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="dashboard-theme">
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="/"><img src="{% static 'images/login.png' %}" alt="Logo" class="navbar-logo"></a>
+      <h3>Land Insights</h3>
+    </div>
+  </nav>
+
+  <h2>{{ title }}</h2>
+
+  <div class="dashboard-container">
+    <div class="note-card" style="max-width: 700px; margin-top: 10px;">
+      <h4>Edit gallery item</h4>
+      <p>Update the description and optionally replace the image.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" style="background:#fff; padding:20px; border-radius:12px; max-width:700px; margin: 20px auto;">
+      {% csrf_token %}
+      <div style="display:flex; gap:16px; align-items:flex-start; margin-bottom: 16px;">
+        <img src="{{ item.image.url }}" alt="Current Image" style="width:140px; height:140px; object-fit:cover; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <div style="flex:1;">
+          <label style="display:block; font-weight:600; margin-bottom:6px;">Replace image (optional)</label>
+          <input type="file" name="image" accept="image/*">
+        </div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display:block; font-weight:600; margin-bottom:6px;">Description</label>
+        <textarea name="description" rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e5e7eb;">{{ item.description }}</textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="map-toggle-btn">Save</button>
+        <a href="/{{ category }}/gallery/" class="map-toggle-btn" style="text-decoration:none;">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <footer class="simple-footer">
+    <p>&copy; 2025 Land Insights</p>
+  </footer>
+</body>
+</html>
+
+

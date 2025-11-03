@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css">
+  <style>
+    .gallery-row-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .gallery-row-image {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 12px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .gallery-row-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      color: #1f2937;
+    }
+    .gallery-row-meta {
+      font-size: 12px;
+      color: #64748b;
+    }
+    .gallery-row-actions { margin-top: 6px; }
+    @media (max-width: 640px) {
+      .gallery-row-card { flex-direction: column; }
+      .gallery-row-image { width: 100%; height: 180px; }
+    }
+  </style>
+</head>
+<body class="dashboard-theme">
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="/"><img src="{% static 'images/login.png' %}" alt="Logo" class="navbar-logo"></a>
+      <h3>Land Insights</h3>
+      <ul>
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/holding/">Land Holding</a></li>
+        <li><a href="/irrigation/">Irrigation</a></li>
+        <li><a href="/cropping/">Cropping Patterns</a></li>
+      </ul>
+    </div>
+    <div class="navbar-right">
+      <a href="/logout/" class="map-toggle-btn">Logout</a>
+    </div>
+  </nav>
+
+  <h2>{{ title }}</h2>
+
+  <div class="dashboard-container">
+    <div class="summary-stats" style="margin-top: 0; grid-template-columns: 1fr;">
+      {% for item in items %}
+      <div class="stat-card" style="padding: 0; overflow: visible;">
+        <div class="gallery-row-card">
+          <a href="{{ item.image.url }}" data-lightbox="gallery" data-title="{{ item.description|default:'' }}">
+            <img class="gallery-row-image" src="{{ item.image.url }}" alt="Gallery Image">
+          </a>
+          <div class="gallery-row-content">
+            <div style="display:flex; align-items:center; gap:8px;">
+              {% if select_mode and request.user.is_staff %}
+              <input type="checkbox" name="ids" value="{{ item.id }}" form="bulkActionForm" style="transform: scale(1.2);" />
+              {% endif %}
+              <div>{{ item.description|default:"" }}</div>
+            </div>
+            <div class="gallery-row-meta">{{ item.created_at|date:"M d, Y H:i" }}</div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="note-card" style="max-width: 600px;">
+        <h4>No items yet</h4>
+        <p>Gallery is empty. Admins can add images and descriptions.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if request.user.is_staff or request.user.is_superuser %}
+    <div style="text-align:center; margin: 20px 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <a href="/{{ category }}/gallery/upload/" class="map-toggle-btn" style="text-decoration:none;">➕ Add Image</a>
+      {% if not select_mode %}
+      <a href="/{{ category }}/gallery/?select=1" class="map-toggle-btn" style="text-decoration:none;">🗑️ Delete</a>
+      <a href="/{{ category }}/gallery/?select=1" class="map-toggle-btn" style="text-decoration:none;">✏️ Edit</a>
+      {% else %}
+      <form method="post" id="bulkActionForm">
+        {% csrf_token %}
+        <button type="submit" class="map-toggle-btn" formaction="/{{ category }}/gallery/bulk-delete/" onclick="return confirm('Delete selected items?');">Delete Selected</button>
+        <button type="submit" class="map-toggle-btn" formaction="/{{ category }}/gallery/bulk-edit/">Edit Selected</button>
+        <a href="/{{ category }}/gallery/" class="map-toggle-btn" style="text-decoration:none;">Cancel</a>
+      </form>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <footer class="simple-footer">
+    <p>&copy; 2025 Land Insights</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"></script>
+</body>
+</html>
+
+

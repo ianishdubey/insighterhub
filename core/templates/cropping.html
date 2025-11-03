@@ -1,0 +1,249 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Cropping Patterns | Insighterhub</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="harvest-glow-theme">
+  <!-- Background Video -->
+  <video class="dashboard-background-video" autoplay muted loop>
+    <source src="https://cdn.pixabay.com/video/2020/07/21/45221-442642947_large.mp4" type="video/mp4">
+    <!-- Fallback for browsers that don't support video -->
+  </video>
+  <div class="dashboard-overlay"></div>
+  
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="/"><img src="{% static 'images/login.png' %}" alt="Logo" class="navbar-logo"></a>
+      <h3>Insighterhub</h3>
+      <ul>
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/holding/">Land Holding</a></li>
+        <li><a href="/irrigation/">Irrigation</a></li>
+        <li><a href="/cropping/">Cropping Patterns</a></li>
+      </ul>
+    </div>
+    <div class="navbar-right">
+      <a href="/logout/" class="map-toggle-btn">Logout</a>
+    </div>
+  </nav>
+  <h2>Cropping Patterns</h2>
+  
+  <!-- Subtitle and Overview -->
+  <div class="land-holding-subtitle">
+    <h3>Analyze land use patterns and cropping statistics — from geographical areas and forests to cultivation patterns and land utilization across different states.</h3>
+  </div>
+
+  <!-- Summary Statistics Cards -->
+  <div class="summary-stats">
+    <div class="stat-card">
+      <div class="stat-icon">🌍</div>
+      <div class="stat-value" id="total-geographical-area">Loading...</div>
+      <div class="stat-label">Total Geographical Area (Ha)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🌾</div>
+      <div class="stat-value" id="net-area-sown">Loading...</div>
+      <div class="stat-label">Net Area Sown (Ha)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🌳</div>
+      <div class="stat-value" id="forests-area">Loading...</div>
+      <div class="stat-label">Forests (Ha)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏛️</div>
+      <div class="stat-value" id="states-count">Loading...</div>
+      <div class="stat-label">States Covered</div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-cards">
+    <div class="kpi-card">
+      <div class="kpi-icon">🌍</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Total Geographical Area</div>
+        <div class="kpi-value" id="kpi-total-geographical">Loading...</div>
+        <div class="kpi-trend">Across all states</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌾</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Net Area Sown</div>
+        <div class="kpi-value" id="kpi-net-area-sown">Loading...</div>
+        <div class="kpi-trend">Cultivated land</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌳</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Forest Coverage</div>
+        <div class="kpi-value" id="kpi-forests">Loading...</div>
+        <div class="kpi-trend">Forest area</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🏔️</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Not Available for Cultivation</div>
+        <div class="kpi-value" id="kpi-not-available">Loading...</div>
+        <div class="kpi-trend">Non-cultivable land</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌱</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Current Fallows</div>
+        <div class="kpi-value" id="kpi-current-fallows">Loading...</div>
+        <div class="kpi-trend">Temporarily unused</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🏛️</div>
+      <div class="kpi-content">
+        <div class="kpi-title">States Covered</div>
+        <div class="kpi-value" id="kpi-states-count">Loading...</div>
+        <div class="kpi-trend">Geographic coverage</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-container">
+    <div class="map-controls" style="margin-bottom: 20px;">
+      <button id="toggle-map-btn" class="map-toggle-btn">🗺️ Map</button>
+      <button id="toggle-chart-btn" class="map-toggle-btn">📊 Chart</button>
+      <a href="/cropping/gallery/" class="map-toggle-btn" style="text-decoration:none; display:inline-block; text-align:center;">📷 Gallery</a>
+    </div>
+    <div id="map-section" style="display: none;">
+      <div id="map" style="height: 400px; margin-top: 20px; border-radius: 10px; overflow: hidden;"></div>
+      <div class="note-card">
+        <h4>Land-use (cropping) map</h4>
+        <p>Each marker represents a state's centroid. Popups show land-use metrics (Area): Total geographical area, Reporting area, Forests, Not available for cultivation, Permanent pastures, Tree crops & groves, Culturable wasteland, Fallow (other than current), Current fallows, and Net area sown.</p>
+        <p class="muted">This view uses the "Area" category. Percentages can be served via the API if needed.</p>
+      </div>
+    </div>
+    <div id="chart-section" style="display: none;">
+      <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h4 style="text-align: center; margin-bottom: 20px; color: #2d3748;">Land Use Distribution</h4>
+        <canvas id="croppingChart" style="max-height: 400px;"></canvas>
+      </div>
+      <div class="note-card">
+        <h4>Land use chart</h4>
+        <p>Bar chart showing land use areas by state. Displays key metrics like net area sown, forests, and other land use categories.</p>
+        <p class="muted">Hover over bars to see exact values and state names.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Land Use Details Table -->
+  <div class="land-details-section">
+    <div class="section-header">
+      <h3>🌾 Land Use Details</h3>
+      <div class="filter-bar">
+        <input type="text" id="search-input" placeholder="🔍 Search by state / land use type" class="search-input">
+        <select id="category-filter" class="filter-select">
+          <option value="">All Categories</option>
+          <option value="Area">Area</option>
+          <option value="Percentage to Geographical Area">Percentage to Geographical Area</option>
+        </select>
+        <select id="land-use-filter" class="filter-select">
+          <option value="">All Land Use Types</option>
+          <option value="forests">Forests</option>
+          <option value="net_area_sown">Net Area Sown</option>
+          <option value="current_fallows">Current Fallows</option>
+          <option value="culturable_wasteland">Culturable Wasteland</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="land-table">
+        <thead>
+          <tr>
+            <th>State</th>
+            <th>Category</th>
+            <th>Total Geographical Area (Ha)</th>
+            <th>Net Area Sown (Ha)</th>
+            <th>Forests (Ha)</th>
+            <th>Current Fallows (Ha)</th>
+            <th>Culturable Wasteland (Ha)</th>
+          </tr>
+        </thead>
+        <tbody id="land-use-table-body">
+          <!-- Data will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Insights and Recommendations -->
+  <div class="insights-section">
+    <h3>📍 Land Use Insights & Analysis</h3>
+    <div class="insights-grid">
+      <div class="insight-card positive">
+        <div class="insight-icon">🌾</div>
+        <div class="insight-content">
+          <div class="insight-title">High Cultivation Areas</div>
+          <div class="insight-text">States with significant net area sown show strong agricultural activity and land utilization.</div>
+        </div>
+      </div>
+      <div class="insight-card warning">
+        <div class="insight-icon">🌱</div>
+        <div class="insight-content">
+          <div class="insight-title">Fallows Analysis</div>
+          <div class="insight-text">Current fallows indicate temporary land rest periods, which can be optimized for better productivity.</div>
+        </div>
+      </div>
+      <div class="insight-card alert">
+        <div class="insight-icon">🌳</div>
+        <div class="insight-content">
+          <div class="insight-title">Forest Conservation</div>
+          <div class="insight-text">Forest coverage data helps understand environmental balance and conservation efforts across states.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historical Trends -->
+  <div class="trends-section">
+    <h3>📈 Land Use Trends & Analysis</h3>
+    <div class="trends-grid">
+      <div class="trend-card">
+        <h4>Land Utilization Over the Years</h4>
+        <div class="trend-chart" id="utilization-chart">
+          <canvas id="utilizationChart"></canvas>
+        </div>
+      </div>
+      <div class="trend-card">
+        <h4>Forest Coverage Trend (2020–2025)</h4>
+        <div class="trend-chart" id="forest-chart">
+          <canvas id="forestChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insights Summary -->
+  <div class="insights-summary">
+    <h3>🧠 Land Use Insights Summary</h3>
+    <div class="summary-content">
+      <p>Based on the land use data, the analysis covers <strong>geographical areas</strong>, <strong>cultivation patterns</strong>, and <strong>forest coverage</strong> across different states. The data provides insights into <strong>land utilization efficiency</strong> and <strong>agricultural productivity</strong>.</p>
+      <p>Each state's land use data includes detailed breakdown of <strong>cultivable areas</strong>, <strong>forest coverage</strong>, and <strong>fallow lands</strong>, enabling comprehensive analysis of agricultural patterns and land management practices.</p>
+    </div>
+  </div>
+  
+  <!-- Simple Footer -->
+  <footer class="simple-footer">
+    <p>&copy; 2025 Insighterhub. All rights reserved. Built with ❤️ for Indian Agriculture</p>
+  </footer>
+  
+  <script src="{% static 'js/cropping.js' %}"></script>
+</body>
+</html>
+

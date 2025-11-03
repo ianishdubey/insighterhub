@@ -1,0 +1,282 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Land Holding | Insighterhub</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="agro-spring-theme">
+  <!-- Background Video -->
+  <video class="dashboard-background-video" autoplay muted loop playsinline>
+    <source src="https://cdn.pixabay.com/video/2021/08/10/84624-585553977_large.mp4" type="video/mp4">
+    <!-- Fallback for browsers that don't support video -->
+    Your browser does not support the video tag.
+  </video>
+  <div class="dashboard-overlay"></div>
+  
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="/"><img src="{% static 'images/login.png' %}" alt="Logo" class="navbar-logo"></a>
+      <h3>Insighterhub</h3>
+      <ul>
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/holding/">Land Holding</a></li>
+        <li><a href="/irrigation/">Irrigation</a></li>
+        <li><a href="/cropping/">Cropping Patterns</a></li>
+      </ul>
+    </div>
+    <div class="navbar-right">
+      <a href="/logout/" class="map-toggle-btn">Logout</a>
+    </div>
+  </nav>
+  <h2>Land Holding</h2>
+  
+  <!-- Subtitle and Overview -->
+  <div class="land-holding-subtitle">
+    <h3>Get a comprehensive overview of your land parcels — from size and location to usage and productivity potential.</h3>
+  </div>
+
+  <!-- Summary Statistics Cards -->
+  <div class="summary-stats">
+    <div class="stat-card">
+      <div class="stat-icon">📏</div>
+      <div class="stat-value" id="total-land-holding">Loading...</div>
+      <div class="stat-label">Total Land Holding (Ha)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏘️</div>
+      <div class="stat-value" id="regions-count">Loading...</div>
+      <div class="stat-label">Total Regions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🌾</div>
+      <div class="stat-value" id="avg-land-holding">Loading...</div>
+      <div class="stat-label">Average Land Holding (Ha)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏛️</div>
+      <div class="stat-value" id="states-count">Loading...</div>
+      <div class="stat-label">States Covered</div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-cards">
+    <div class="kpi-card">
+      <div class="kpi-icon">🧭</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Total Regions</div>
+        <div class="kpi-value" id="kpi-regions-count">Loading...</div>
+        <div class="kpi-trend">Geographic coverage</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌾</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Average Land Holding</div>
+        <div class="kpi-value" id="kpi-avg-land-holding">Loading...</div>
+        <div class="kpi-trend">Per region</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌱</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Average Yield</div>
+        <div class="kpi-value" id="kpi-avg-yield">Loading...</div>
+        <div class="kpi-trend">Per hectare</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🌡️</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Average Rainfall</div>
+        <div class="kpi-value" id="kpi-avg-rainfall">Loading...</div>
+        <div class="kpi-trend">Annual precipitation</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">💧</div>
+      <div class="kpi-content">
+        <div class="kpi-title">Irrigation Coverage</div>
+        <div class="kpi-value" id="kpi-irrigation-coverage">Loading...</div>
+        <div class="kpi-trend">Irrigated regions</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🏛️</div>
+      <div class="kpi-content">
+        <div class="kpi-title">States Covered</div>
+        <div class="kpi-value" id="kpi-states-count">Loading...</div>
+        <div class="kpi-trend">Geographic spread</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-container">
+    <div class="map-controls" style="margin-bottom: 20px;">
+      <button id="toggle-map-btn" class="map-toggle-btn">🗺️ Map</button>
+      <button id="toggle-chart-btn" class="map-toggle-btn">📊 Chart</button>
+      <a href="/holding/gallery/" class="map-toggle-btn" style="text-decoration:none; display:inline-block; text-align:center;">📷 Gallery</a>
+    </div>
+    <div id="map-section" style="display: none;">
+      <div id="map" style="height: 400px; margin-top: 20px; border-radius: 10px; overflow: hidden;"></div>
+      <div class="note-card">
+        <h4>Land holding map</h4>
+        <p>Each marker represents a region/state centroid. Color indicates land holding quartiles: lighter = lower, darker = higher.</p>
+        <p class="muted">Click a marker to see the exact land holding for that location.</p>
+      </div>
+    </div>
+    <div id="chart-section" style="display: none;">
+      <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h4 style="text-align: center; margin-bottom: 20px; color: #2d3748;">Land Holding Distribution</h4>
+        <canvas id="landHoldingChart" style="max-height: 400px;"></canvas>
+      </div>
+      <div class="note-card">
+        <h4>Land holding chart</h4>
+        <p>Bar chart showing land holding values by region. Colors match the map quartiles for easy comparison.</p>
+        <p class="muted">Hover over bars to see exact values and region names.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Land Details Table -->
+  <div class="land-details-section">
+    <div class="section-header">
+      <h3>🗂️ Land Details Table</h3>
+      <div class="filter-bar">
+        <input type="text" id="search-input" placeholder="🔍 Search by crop / soil type" class="search-input">
+        <select id="soil-filter" class="filter-select">
+          <option value="">All Soil Types</option>
+          <option value="Loamy">Loamy</option>
+          <option value="Clay">Clay</option>
+          <option value="Sandy">Sandy</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="land-table">
+        <thead>
+          <tr>
+            <th>Parcel ID</th>
+            <th>Location</th>
+            <th>Area (Acre)</th>
+            <th>Soil Type</th>
+            <th>Current Crop</th>
+            <th>Productivity (Q/Acre)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>P-101</td>
+            <td>Village A</td>
+            <td>25</td>
+            <td>Loamy</td>
+            <td>Wheat</td>
+            <td>19</td>
+          </tr>
+          <tr>
+            <td>P-102</td>
+            <td>Village B</td>
+            <td>20</td>
+            <td>Clay</td>
+            <td>Fallow</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>P-103</td>
+            <td>Village C</td>
+            <td>30</td>
+            <td>Loamy</td>
+            <td>Rice</td>
+            <td>22</td>
+          </tr>
+          <tr>
+            <td>P-104</td>
+            <td>Village D</td>
+            <td>35</td>
+            <td>Sandy</td>
+            <td>Cotton</td>
+            <td>15</td>
+          </tr>
+          <tr>
+            <td>P-105</td>
+            <td>Village E</td>
+            <td>15</td>
+            <td>Loamy</td>
+            <td>Maize</td>
+            <td>12</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Insights and Recommendations -->
+  <div class="insights-section">
+    <h3>📍 Land Holding Insights & Analysis</h3>
+    <div class="insights-grid">
+      <div class="insight-card positive">
+        <div class="insight-icon">🌱</div>
+        <div class="insight-content">
+          <div class="insight-title">Regional Land Distribution</div>
+          <div class="insight-text">Land holding data shows regional variations in agricultural land distribution across different states and regions.</div>
+        </div>
+      </div>
+      <div class="insight-card warning">
+        <div class="insight-icon">🌾</div>
+        <div class="insight-content">
+          <div class="insight-title">Yield Analysis</div>
+          <div class="insight-text">Yield per hectare data provides insights into agricultural productivity patterns across different regions.</div>
+        </div>
+      </div>
+      <div class="insight-card alert">
+        <div class="insight-icon">📊</div>
+        <div class="insight-content">
+          <div class="insight-title">Environmental Factors</div>
+          <div class="insight-text">Rainfall and irrigation data help understand environmental conditions affecting agricultural productivity.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historical Trends -->
+  <div class="trends-section">
+    <h3>📈 Historical Trends & Comparison</h3>
+    <div class="trends-grid">
+      <div class="trend-card">
+        <h4>Land Productivity Over the Years</h4>
+        <div class="trend-chart" id="productivity-chart">
+          <canvas id="productivityChart"></canvas>
+        </div>
+      </div>
+      <div class="trend-card">
+        <h4>Land Utilization Trend (2020–2025)</h4>
+        <div class="trend-chart" id="utilization-chart">
+          <canvas id="utilizationChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insights Summary -->
+  <div class="insights-summary">
+    <h3>🧠 Insighterhub Summary</h3>
+    <div class="summary-content">
+      <p>Based on the regional land holding data, the analysis covers multiple states with varying land holding patterns. The data includes information on <strong>land holding sizes</strong>, <strong>irrigation coverage</strong>, <strong>crop yields</strong>, and <strong>rainfall patterns</strong> across different regions.</p>
+      <p>Each region's data provides insights into <strong>agricultural productivity</strong>, <strong>land utilization</strong>, and <strong>environmental factors</strong> that influence farming outcomes. The comprehensive dataset enables analysis of regional agricultural patterns and land management practices.</p>
+    </div>
+  </div>
+  
+  <!-- Simple Footer -->
+  <footer class="simple-footer">
+    <p>&copy; 2025 Insighterhub. All rights reserved. Built with ❤️ for Indian Agriculture</p>
+  </footer>
+  
+  <script src="{% static 'js/holding.js' %}"></script>
+</body>
+</html>
+
